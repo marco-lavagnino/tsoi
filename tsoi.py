@@ -91,7 +91,7 @@ def get_max_interrupts():
 def producer(queue):
     max_interrupts = get_max_interrupts()
     synthesizer = Synthesizer(
-        osc1_waveform=Waveform.sine,
+        osc1_waveform=Waveform.square,
         osc1_volume=1.0,
         use_osc2=False,
     )
