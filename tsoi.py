@@ -1,4 +1,7 @@
 
+from time import time
+from queue import Queue
+from threading import Thread
 from time import sleep
 import re
 from synthesizer import Player, Synthesizer, Waveform
@@ -85,24 +88,52 @@ def get_max_interrupts():
     return max_interrupts
 
 
-player = Player()
+def producer(queue):
+    max_interrupts = get_max_interrupts()
+    synthesizer = Synthesizer(
+        osc1_waveform=Waveform.sine,
+        osc1_volume=1.0,
+        use_osc2=False,
+    )
 
-player.open_stream()
-synthesizer = Synthesizer(
-    osc1_waveform=Waveform.sine,
-    osc1_volume=1.0,
-    use_osc2=False,
-)
+    for num_interrupts in interruption_iter():
+
+        if max_interrupts < num_interrupts:
+            max_interrupts = num_interrupts
+
+        tone_num = round(num_interrupts / max_interrupts * (len(TONES)-1))
+        print(tone_num, max_interrupts)
+        # sleep(SLEEP_TIME)
+        tone = synthesizer.generate_constant_wave(TONES[tone_num], SLEEP_TIME)
+        queue.put(tone)
 
 
-max_interrupts = get_max_interrupts()
+def consumer(queue):
+    player = Player()
+    player.open_stream()
 
-for num_interrupts in interruption_iter():
-    if max_interrupts < num_interrupts:
-        max_interrupts = num_interrupts
+    while True:
+        tone = queue.get()
 
-    tone_num = round(num_interrupts / max_interrupts * (len(TONES)-1))
-    print(tone_num, max_interrupts)
-    # sleep(SLEEP_TIME)
-    tone = synthesizer.generate_constant_wave(TONES[tone_num], SLEEP_TIME)
-    player.play_wave(tone)
+        if tone is None:
+            break
+
+        player.play_wave(tone)
+
+
+def play_sounds_of_interrupts():
+    queue = Queue(maxsize=1)
+
+    t = Thread(target=consumer, args=[queue])
+    t.start()
+
+    try:
+        producer(queue)
+    except KeyboardInterrupt:
+        queue.put(None)
+        t.join()
+        print('closing...')
+
+
+if __name__ == "__main__":
+    play_sounds_of_interrupts()
