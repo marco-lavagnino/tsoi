@@ -9,7 +9,7 @@ INTERRUPTS_FILE = '/proc/interrupts'
 def get_number_of_cores():
     """
     There are numerous ways of measuring number of cores.
-    Some make the distinction between phisical cores and
+    Some make the distinction between physical cores and
     virtual ones.
     Since we only care about cores in this file, we'll get
     the number of cores from this file.
