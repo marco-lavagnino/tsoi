@@ -23,7 +23,7 @@ def get_number_of_cores():
 NUMBER_OF_CORES = get_number_of_cores()
 
 
-def get_interruptions():
+def get_interruptions(interrupts_fileobj):
     """
     The file in /proc/interrupts displays the number of
     interrupts for various types since the system booted.
@@ -31,18 +31,15 @@ def get_interruptions():
     """
     interruptions = 0
 
-    with open(INTERRUPTS_FILE) as f:
-        contents = f.read()
+    contents = interrupts_fileobj.read()
+    interrupts_fileobj.seek(0)
 
     for line in contents.split('\n')[1:]:
         columns = line.split()
         if len(columns) < NUMBER_OF_CORES + 1:
             continue
 
-        interruptions += sum(
-            int(n) for n
-            in columns[1:NUMBER_OF_CORES + 1]
-        )
+        interruptions += sum(int(n) for n in columns[1:NUMBER_OF_CORES + 1])
 
     return interruptions
 
@@ -52,9 +49,10 @@ def interruption_iter():
     A generator that returns the amount of interruptions
     that happened since the last time a value was consumed.
     """
-    last_interruptions = get_interruptions()
+    with open(INTERRUPTS_FILE) as f:
+        last_interruptions = get_interruptions(f)
 
-    while True:
-        current_interruptions = get_interruptions()
-        yield current_interruptions - last_interruptions
-        last_interruptions = current_interruptions
+        while True:
+            current_interruptions = get_interruptions(f)
+            yield current_interruptions - last_interruptions
+            last_interruptions = current_interruptions
