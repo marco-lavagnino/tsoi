@@ -1,7 +1,9 @@
-from constants import SLEEP_TIME
-from scipy.stats import percentileofscore
 from itertools import islice
 from time import sleep
+
+from scipy.stats import percentileofscore
+
+from constants import SLEEP_TIME
 from interruptions import interruption_iter
 
 

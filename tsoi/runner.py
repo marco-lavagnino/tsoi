@@ -1,9 +1,9 @@
-
 from queue import Queue
 from threading import Thread
-from synthesizer import Synthesizer, Waveform, Player
+
+from constants import SLEEP_TIME, TONES
 from interruptions import interruption_iter
-from constants import TONES, SLEEP_TIME
+from synthesizer import Player, Synthesizer, Waveform
 
 
 def producer(queue, tone_heuristic):
@@ -15,10 +15,7 @@ def producer(queue, tone_heuristic):
     tone_heuristic.warm_up()
 
     for num_interrupts in interruption_iter():
-
-        tone_num = round(
-            tone_heuristic.get_tone(num_interrupts) * (len(TONES) - 1)
-        )
+        tone_num = round(tone_heuristic.get_tone(num_interrupts) * (len(TONES) - 1))
         tone = synthesizer.generate_constant_wave(TONES[tone_num], SLEEP_TIME)
 
         print(tone_num, num_interrupts)
