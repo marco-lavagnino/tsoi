@@ -53,17 +53,14 @@ class PercentileHeuristic(ToneHeuristic):
     """
 
     def warm_up(self):
-        self.past_interrupts = []
-
-        for num_interrupts in islice(interruption_iter(), 50):
-            self.past_interrupts.append(num_interrupts)
+        self.deque = deque(maxlen=DEQUE_MAXLEN)
+        for num_interrupts in islice(interruption_iter(), self.deque.maxlen):
+            self.deque.append(num_interrupts)
             sleep(SLEEP_TIME)
 
     def get_tone(self, num_interrupts):
-        if len(self.past_interrupts) < 512:
-            self.past_interrupts.append(num_interrupts)
-
-        return percentileofscore(self.past_interrupts, num_interrupts) / 100
+        self.deque.append(num_interrupts)
+        return percentileofscore(self.deque, num_interrupts) / 100
 
 
 HEURISTIC_OPTIONS = {
