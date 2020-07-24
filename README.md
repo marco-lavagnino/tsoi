@@ -17,7 +17,7 @@ apt install python3.7-dev portaudio19-dev
 Then, install python dependencies
 
 ```bash
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
 ## Running project
